@@ -2,10 +2,11 @@ import os
 from github import Github
 from notion_client import Client
 
-def verify_github() -> dict:
-    token = os.environ.get("GITHUB_TOKEN")
+
+def verify_github(github_token: str = None) -> dict:
+    token = github_token or os.environ.get("GITHUB_TOKEN")
     if not token:
-        return {"valid": False, "error": "GITHUB_TOKEN environment variable is missing"}
+        return {"valid": False, "error": "GitHub account not connected. Please connect GitHub via your account settings."}
     try:
         g = Github(token)
         user = g.get_user()
@@ -13,6 +14,7 @@ def verify_github() -> dict:
         return {"valid": True, "username": login, "error": None}
     except Exception as e:
         return {"valid": False, "error": str(e)}
+
 
 def verify_notion() -> dict:
     api_key = os.environ.get("NOTION_API_KEY")

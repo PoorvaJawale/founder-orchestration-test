@@ -1,11 +1,12 @@
-import os
 from github import Github, GithubException
 
-def get_client() -> Github:
-    return Github(os.environ["GITHUB_TOKEN"])
 
-def create_github_repo(name: str, description: str) -> dict:
-    g = get_client()
+def get_client(github_token: str) -> Github:
+    return Github(github_token)
+
+
+def create_github_repo(name: str, description: str, github_token: str) -> dict:
+    g = get_client(github_token)
     user = g.get_user()
     sanitized = name.lower().replace(" ", "-").replace("/", "-")[:50]
     try:
@@ -22,8 +23,9 @@ def create_github_repo(name: str, description: str) -> dict:
             return {"url": repo.html_url, "name": repo.full_name, "created": False}
         raise
 
-def create_github_issues(repo_full_name: str, issues: list[dict]) -> list[dict]:
-    g = get_client()
+
+def create_github_issues(repo_full_name: str, issues: list[dict], github_token: str) -> list[dict]:
+    g = get_client(github_token)
     repo = g.get_repo(repo_full_name)
     labels_created = set()
     created = []

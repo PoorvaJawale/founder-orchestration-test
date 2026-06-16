@@ -7,6 +7,8 @@ from typing import Optional
 from dotenv import load_dotenv
 load_dotenv()
 
+import httpx
+
 from fastapi import FastAPI, HTTPException, UploadFile, File, Form, Header
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response, StreamingResponse
@@ -35,6 +37,27 @@ app.add_middleware(
 )
 
 
+async def get_github_token_for_user(clerk_user_id: str) -> Optional[str]:
+    """Fetch the user's GitHub OAuth token from Clerk."""
+    clerk_secret = os.environ.get("CLERK_SECRET_KEY")
+    if not clerk_secret or clerk_user_id == "demo-user":
+        return None
+    try:
+        async with httpx.AsyncClient() as client:
+            res = await client.get(
+                f"https://api.clerk.com/v1/users/{clerk_user_id}/oauth_access_tokens/oauth_github",
+                headers={"Authorization": f"Bearer {clerk_secret}"},
+                timeout=10,
+            )
+            if res.status_code == 200:
+                data = res.json()
+                if data and isinstance(data, list) and len(data) > 0:
+                    return data[0].get("token")
+    except Exception:
+        pass
+    return None
+
+
 def get_user_id(authorization: Optional[str]) -> str:
     if not authorization:
         return "demo-user"
@@ -55,8 +78,10 @@ async def health():
 
 
 @app.get("/api/integrations/verify")
-async def verify_integrations():
-    gh_status = verify_github()
+async def verify_integrations(authorization: Optional[str] = Header(None)):
+    user_id = get_user_id(authorization)
+    github_token = await get_github_token_for_user(user_id)
+    gh_status = verify_github(github_token)
     notion_status = verify_notion()
     return {
         "github": gh_status,
@@ -124,10 +149,11 @@ async def stream_session(
     startup_idea = session["startup_idea"]
     uploaded_files_json = session["uploaded_files"]
     uploaded_files = json.loads(uploaded_files_json) if uploaded_files_json else []
+    github_token = await get_github_token_for_user(user_id)
 
     async def event_generator():
         try:
-            async for event in run_orchestration_stream(session_id, user_id, startup_idea, uploaded_files):
+            async for event in run_orchestration_stream(session_id, user_id, startup_idea, uploaded_files, github_token):
                 if event.get("event") == "log":
                     yield f"data: {json.dumps({'type': 'log', 'message': event['message']})}\n\n"
 

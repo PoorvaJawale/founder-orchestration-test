@@ -24,7 +24,7 @@ Given the features and architecture, create a sprint plan and return a JSON obje
 }
 Create 3-4 sprints with 5-8 tasks each. Return ONLY the JSON."""
 
-def run_engineering_manager(prd: dict, architecture: dict) -> dict:
+def run_engineering_manager(prd: dict, architecture: dict, github_token: str = None) -> dict:
     llm = ChatOpenAI(model="gpt-4o", temperature=0.3, api_key=os.environ["OPENAI_API_KEY"])
 
     messages = [
@@ -49,7 +49,7 @@ Data models: {json.dumps(architecture.get('data_models', []))}
     repo_name = architecture.get("github_repo_name")
     result["github_issues_created"] = 0
     result["github_issues"] = []
-    if repo_name:
+    if repo_name and github_token:
         try:
             issues = []
             for sprint in result.get("sprints", []):
@@ -59,7 +59,7 @@ Data models: {json.dumps(architecture.get('data_models', []))}
                         "body": f"**Sprint {sprint['sprint']} — {sprint.get('goal', '')}**\n\n{task.get('description', '')}\n\n**Story Points:** {task.get('story_points', 0)}",
                         "label": task.get("label", "task"),
                     })
-            created = create_github_issues(repo_name, issues)
+            created = create_github_issues(repo_name, issues, github_token)
             result["github_issues_created"] = len([i for i in created if "error" not in i])
             result["github_issues"] = created
             result["github_repo_url"] = architecture.get("github_repo_url")

@@ -105,7 +105,18 @@ export default function Dashboard() {
                 </span>
               </div>
               {!integrations.github.valid && (
-                <p className="text-[10px] mt-0.5" style={{ color: "#ff6666" }}>Error: {integrations.github.error}</p>
+                <div className="mt-1 flex items-center gap-2">
+                  <p className="text-[10px]" style={{ color: "#ff6666" }}>GitHub not connected to your account.</p>
+                  <a
+                    href="https://clerk.com/docs/authentication/social-connections/github"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[10px] underline font-semibold"
+                    style={{ color: "var(--accent)" }}
+                  >
+                    Connect via Account Settings →
+                  </a>
+                </div>
               )}
 
               <div className="flex items-center justify-between text-xs pt-1 border-t" style={{ borderColor: "var(--border)" }}>
@@ -212,7 +223,7 @@ export default function Dashboard() {
         {isBlocked && !checkingIntegrations && (
           <div className="mb-4 px-4 py-3 rounded-lg text-xs"
                style={{ background: "#f59e0b20", border: "1px solid var(--warning)", color: "var(--warning)", lineHeight: "1.4" }}>
-            ⚠️ <b>Integrations Check Failed:</b> Please check your <code>GITHUB_TOKEN</code>, <code>NOTION_API_KEY</code>, or <code>NOTION_DATABASE_ID</code> environment configurations. Both integrations must connect successfully to run.
+            ⚠️ <b>Integrations Required:</b> Please connect your GitHub account via Account Settings (click your avatar → Manage Account → Connected Accounts → GitHub) and ensure Notion is configured. Both must be active to run orchestration.
           </div>
         )}
 

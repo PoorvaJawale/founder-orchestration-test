@@ -28,7 +28,7 @@ Given the startup PRD and market context, design the technical architecture and 
 }
 Return ONLY the JSON."""
 
-def run_architect(advisor_output: dict, prd: dict) -> dict:
+def run_architect(advisor_output: dict, prd: dict, github_token: str = None) -> dict:
     llm = ChatOpenAI(model="gpt-4o", temperature=0.2, api_key=os.environ["OPENAI_API_KEY"])
 
     messages = [
@@ -49,16 +49,21 @@ Target audience: {advisor_output.get('target_audience', '')}
     result = json.loads(content.strip())
 
     # Create GitHub repo
-    try:
-        startup_name = advisor_output.get("startup_name", "ai-startup-project")
-        repo_name = startup_name.lower().replace(" ", "-")
-        description = advisor_output.get("refined_idea", "")[:150]
-        repo_result = create_github_repo(repo_name, description)
-        result["github_repo_url"] = repo_result["url"]
-        result["github_repo_name"] = repo_result["name"]
-    except Exception as e:
+    if github_token:
+        try:
+            startup_name = advisor_output.get("startup_name", "ai-startup-project")
+            repo_name = startup_name.lower().replace(" ", "-")
+            description = advisor_output.get("refined_idea", "")[:150]
+            repo_result = create_github_repo(repo_name, description, github_token)
+            result["github_repo_url"] = repo_result["url"]
+            result["github_repo_name"] = repo_result["name"]
+        except Exception as e:
+            result["github_repo_url"] = None
+            result["github_repo_name"] = None
+            result["github_error"] = str(e)
+    else:
         result["github_repo_url"] = None
         result["github_repo_name"] = None
-        result["github_error"] = str(e)
+        result["github_error"] = "No GitHub token available for this user"
 
     return result

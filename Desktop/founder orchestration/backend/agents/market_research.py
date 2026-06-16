@@ -27,7 +27,7 @@ Return ONLY the JSON."""
 
 def run_market_research(advisor_output: dict) -> dict:
     llm = ChatOpenAI(model="gpt-4o", temperature=0.2, api_key=os.environ["OPENAI_API_KEY"])
-    idea = advisor_output.get("refined_idea", "")
+    idea = advisor_output.get("refined_idea", "")[:200]
     audience = advisor_output.get("target_audience", "")
 
     search_results = search_web(f"{idea} market size growth 2024 2025")

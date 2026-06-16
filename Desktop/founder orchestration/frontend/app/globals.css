@@ -40,6 +40,99 @@ body {
 .btn-primary:hover { background: #4f46e5; transform: translateY(-1px); }
 .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
+/* Clerk dark theme overrides */
+.cl-rootBox,
+.cl-card,
+.cl-signIn-root,
+.cl-signUp-root {
+  background: var(--surface) !important;
+  color: var(--text) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 16px !important;
+}
+
+.cl-headerTitle,
+.cl-headerSubtitle,
+.cl-bodyText,
+.cl-footerActionText,
+.cl-dividerText,
+.cl-formFieldLabel,
+.cl-identityPreviewText {
+  color: var(--text) !important;
+}
+
+.cl-formFieldInput {
+  background: var(--bg) !important;
+  color: var(--text) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 8px !important;
+}
+
+.cl-formFieldInput:focus {
+  border-color: var(--accent) !important;
+  outline: none !important;
+  box-shadow: 0 0 0 2px var(--accent-glow) !important;
+}
+
+.cl-formButtonPrimary {
+  background: var(--accent) !important;
+  color: white !important;
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+}
+
+.cl-formButtonPrimary:hover {
+  background: #4f46e5 !important;
+}
+
+.cl-socialButtonsBlockButton {
+  background: var(--surface2) !important;
+  color: var(--text) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 8px !important;
+}
+
+.cl-socialButtonsBlockButton:hover {
+  border-color: var(--accent) !important;
+}
+
+.cl-socialButtonsBlockButtonText {
+  color: var(--text) !important;
+}
+
+.cl-footerActionLink {
+  color: var(--accent) !important;
+}
+
+.cl-dividerLine {
+  background: var(--border) !important;
+}
+
+.cl-internal-b3fm6y {
+  background: var(--surface) !important;
+}
+
+.cl-footer,
+.cl-footerAction,
+.cl-footerPages {
+  background: var(--surface) !important;
+  border-top: 1px solid var(--border) !important;
+}
+
+.cl-footerActionText {
+  color: var(--muted) !important;
+}
+
+.cl-footer .cl-footerActionLink,
+.cl-footerPages .cl-footerPagesLink {
+  color: var(--accent) !important;
+}
+
+/* Fix any remaining light background leaking through */
+[class*="cl-"] {
+  color-scheme: dark;
+}
+
 @keyframes pulse-ring {
   0% { transform: scale(1); opacity: 1; }
   100% { transform: scale(1.6); opacity: 0; }

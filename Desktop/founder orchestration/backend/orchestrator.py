@@ -19,6 +19,7 @@ class FounderState(TypedDict):
     session_id: str
     user_id: str
     startup_idea: str
+    github_token: Optional[str]
     # Agent outputs
     advisor_output: Optional[dict]
     market_research: Optional[dict]
@@ -121,7 +122,7 @@ def node_architect(state: FounderState, config=None) -> dict:
     if log:
         log("Architect: Compiling system architecture, API endpoints, and database models...")
         
-    result = _safe_run(run_architect, state["advisor_output"], state["product_manager"],
+    result = _safe_run(run_architect, state["advisor_output"], state["product_manager"], state.get("github_token"),
                         agent_name="architect", state=state)
                         
     if log:
@@ -141,7 +142,7 @@ def node_engineering_manager(state: FounderState, config=None) -> dict:
     if log:
         log("Engineering Manager: Formulating sprint plans and story point distributions...")
         
-    result = _safe_run(run_engineering_manager, state["product_manager"], state["architect"],
+    result = _safe_run(run_engineering_manager, state["product_manager"], state["architect"], state.get("github_token"),
                         agent_name="engineering_manager", state=state)
                         
     if log:
@@ -247,13 +248,14 @@ def build_graph():
     return graph.compile()
 
 
-async def run_orchestration_stream(session_id: str, user_id: str, startup_idea: str, uploaded_files: Optional[list] = None):
+async def run_orchestration_stream(session_id: str, user_id: str, startup_idea: str, uploaded_files: Optional[list] = None, github_token: Optional[str] = None):
     """Async generator that yields SSE events as each agent completes."""
     graph = build_graph()
     initial_state: FounderState = {
         "session_id": session_id,
         "user_id": user_id,
         "startup_idea": startup_idea,
+        "github_token": github_token,
         "advisor_output": None,
         "market_research": None,
         "product_manager": None,
