@@ -94,17 +94,22 @@ export function Sidebar({ open, onClose }: Props) {
           flexShrink: 0,
         }}>
           <Link href={isSignedIn ? "/dashboard" : "/"} style={{
-            fontFamily: "Space Mono, monospace",
-            fontWeight: 700,
-            fontSize: "11px",
-            letterSpacing: "0.14em",
-            color: "var(--accent)",
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
             textDecoration: "none",
-            textTransform: "uppercase",
-            textShadow: "0 0 20px var(--accent-glow)",
             whiteSpace: "nowrap",
           }}>
-            ■ Founder OS
+            <img src="/logo.svg" alt="Maestro.ai" width={26} height={26} style={{ borderRadius: "6px" }} />
+            <span style={{
+              fontFamily: "Space Mono, monospace",
+              fontWeight: 700,
+              fontSize: "11px",
+              letterSpacing: "0.14em",
+              color: "var(--accent)",
+              textTransform: "uppercase",
+              textShadow: "0 0 20px var(--accent-glow)",
+            }}>Maestro.ai</span>
           </Link>
           <button
             onClick={onClose}

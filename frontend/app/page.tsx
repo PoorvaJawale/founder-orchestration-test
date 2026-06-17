@@ -199,7 +199,10 @@ export default function Home() {
         backdropFilter: "blur(20px)",
         WebkitBackdropFilter: "blur(20px)",
       }}>
-        <span className="site-logo" style={{ fontSize: "10px" }}>■ Founder OS</span>
+        <span className="site-logo" style={{ fontSize: "10px", display: "flex", alignItems: "center", gap: "6px" }}>
+          <img src="/logo.svg" alt="" width={16} height={16} style={{ borderRadius: "3px" }} />
+          Maestro.ai
+        </span>
         <span className="label">AI-Powered Startup Infrastructure</span>
       </footer>
     </div>
