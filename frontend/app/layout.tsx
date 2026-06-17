@@ -6,7 +6,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "Maestro.ai — AI Agent Platform",
   description: "Turn your startup idea into a complete startup package — powered by 6 AI agents",
-  icons: { icon: "/logo.svg" },
+  icons: { icon: "/logo.png" },
 };
 
 const clerkAppearance = {

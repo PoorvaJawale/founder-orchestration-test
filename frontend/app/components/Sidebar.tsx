@@ -100,7 +100,7 @@ export function Sidebar({ open, onClose }: Props) {
             textDecoration: "none",
             whiteSpace: "nowrap",
           }}>
-            <img src="/logo.svg" alt="Maestro.ai" width={26} height={26} style={{ borderRadius: "6px" }} />
+            <img src="/logo.png" alt="Maestro.ai" width={26} height={26} style={{ borderRadius: "6px" }} />
             <span style={{
               fontFamily: "Space Mono, monospace",
               fontWeight: 700,
