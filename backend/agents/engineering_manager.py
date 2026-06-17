@@ -45,10 +45,11 @@ Data models: {json.dumps(architecture.get('data_models', []))}
             content = content[4:]
     result = json.loads(content.strip())
 
-    # Create GitHub issues if repo exists
+    # Always expose the GitHub repo URL (moved here from architect section)
+    result["github_repo_url"] = architecture.get("github_repo_url")
+
+    # Create GitHub issues if repo exists (action only — not exposed in output)
     repo_name = architecture.get("github_repo_name")
-    result["github_issues_created"] = 0
-    result["github_issues"] = []
     if repo_name and github_token:
         try:
             issues = []
@@ -56,13 +57,10 @@ Data models: {json.dumps(architecture.get('data_models', []))}
                 for task in sprint.get("tasks", []):
                     issues.append({
                         "title": f"[Sprint {sprint['sprint']}] {task['title']}",
-                        "body": f"**Sprint {sprint['sprint']} — {sprint.get('goal', '')}**\n\n{task.get('description', '')}\n\n**Story Points:** {task.get('story_points', 0)}",
+                        "body": f"Sprint {sprint['sprint']} — {sprint.get('goal', '')}\n\n{task.get('description', '')}\n\nStory Points: {task.get('story_points', 0)}",
                         "label": task.get("label", "task"),
                     })
-            created = create_github_issues(repo_name, issues, github_token)
-            result["github_issues_created"] = len([i for i in created if "error" not in i])
-            result["github_issues"] = created
-            result["github_repo_url"] = architecture.get("github_repo_url")
+            create_github_issues(repo_name, issues, github_token)
         except Exception as e:
             result["github_issues_error"] = str(e)
 

@@ -22,11 +22,11 @@ class FounderState(TypedDict):
     github_token: Optional[str]
     # Agent outputs
     advisor_output: Optional[dict]
-    market_research: Optional[dict]
-    product_manager: Optional[dict]
-    architect: Optional[dict]
-    engineering_manager: Optional[dict]
-    marketing: Optional[dict]
+    market_research_output: Optional[dict]
+    product_manager_output: Optional[dict]
+    architect_output: Optional[dict]
+    engineering_manager_output: Optional[dict]
+    marketing_output: Optional[dict]
     # Metadata
     errors: list
     completed_agents: list
@@ -91,7 +91,7 @@ def node_market_research(state: FounderState, config=None) -> dict:
         else:
             log("Market Research: SWOT analysis compiled and competitors resolved.")
             
-    return {**state, "market_research": result,
+    return {**state, "market_research_output": result,
             "completed_agents": state.get("completed_agents", []) + ["market_research"]}
 
 
@@ -102,7 +102,7 @@ def node_product_manager(state: FounderState, config=None) -> dict:
     if log:
         log("Product Manager: Drafting PRD user stories and roadmap milestones...")
         
-    result = _safe_run(run_product_manager, state["advisor_output"], state["market_research"],
+    result = _safe_run(run_product_manager, state["advisor_output"], state["market_research_output"],
                         agent_name="product_manager", state=state)
                         
     if log:
@@ -111,7 +111,7 @@ def node_product_manager(state: FounderState, config=None) -> dict:
         else:
             log(f"Product Manager: PRD document successfully published to Notion.")
             
-    return {**state, "product_manager": result,
+    return {**state, "product_manager_output": result,
             "completed_agents": state.get("completed_agents", []) + ["product_manager"]}
 
 
@@ -122,7 +122,7 @@ def node_architect(state: FounderState, config=None) -> dict:
     if log:
         log("Architect: Compiling system architecture, API endpoints, and database models...")
         
-    result = _safe_run(run_architect, state["advisor_output"], state["product_manager"], state.get("github_token"),
+    result = _safe_run(run_architect, state["advisor_output"], state["product_manager_output"], state.get("github_token"),
                         agent_name="architect", state=state)
                         
     if log:
@@ -131,7 +131,7 @@ def node_architect(state: FounderState, config=None) -> dict:
         else:
             log(f"Architect: GitHub repository created successfully.")
             
-    return {**state, "architect": result,
+    return {**state, "architect_output": result,
             "completed_agents": state.get("completed_agents", []) + ["architect"]}
 
 
@@ -142,7 +142,7 @@ def node_engineering_manager(state: FounderState, config=None) -> dict:
     if log:
         log("Engineering Manager: Formulating sprint plans and story point distributions...")
         
-    result = _safe_run(run_engineering_manager, state["product_manager"], state["architect"], state.get("github_token"),
+    result = _safe_run(run_engineering_manager, state["product_manager_output"], state["architect_output"], state.get("github_token"),
                         agent_name="engineering_manager", state=state)
                         
     if log:
@@ -151,7 +151,7 @@ def node_engineering_manager(state: FounderState, config=None) -> dict:
         else:
             log(f"Engineering Manager: Created GitHub issues for sprint backlog tasks.")
             
-    return {**state, "engineering_manager": result,
+    return {**state, "engineering_manager_output": result,
             "completed_agents": state.get("completed_agents", []) + ["engineering_manager"]}
 
 
@@ -163,7 +163,7 @@ def node_marketing(state: FounderState, config=None) -> dict:
         log("Marketing: Creating landing page copywriting, email sequence, and LinkedIn launch post...")
         
     result = _safe_run(run_marketing, state["advisor_output"],
-                        state["market_research"], state["product_manager"],
+                        state["market_research_output"], state["product_manager_output"],
                         agent_name="marketing", state=state)
                         
     if log:
@@ -172,28 +172,35 @@ def node_marketing(state: FounderState, config=None) -> dict:
         else:
             log("Marketing: Tagline, landing page headline, and pricing strategy generated.")
             
-    return {**state, "marketing": result,
+    return {**state, "marketing_output": result,
             "completed_agents": state.get("completed_agents", []) + ["marketing"],
             "current_agent": "complete"}
+
+
+# Agents that must succeed for the pipeline to continue; others are non-fatal
+_FATAL_AGENTS = {"startup_advisor"}
 
 
 def route_next(state: FounderState) -> str:
     current = state.get("current_agent")
     output_keys = {
         "startup_advisor": "advisor_output",
-        "market_research": "market_research",
-        "product_manager": "product_manager",
-        "architect": "architect",
-        "engineering_manager": "engineering_manager",
-        "marketing": "marketing",
+        "market_research": "market_research_output",
+        "product_manager": "product_manager_output",
+        "architect": "architect_output",
+        "engineering_manager": "engineering_manager_output",
+        "marketing": "marketing_output",
     }
-    
+
     out_key = output_keys.get(current)
     if out_key:
         out_val = state.get(out_key)
         if isinstance(out_val, dict) and "error" in out_val:
-            # Halt immediately on error
-            return END
+            if current in _FATAL_AGENTS:
+                return END
+            # Non-fatal: replace error dict with empty dict so downstream agents
+            # don't crash on missing keys, then continue the pipeline
+            state[out_key] = {}
             
     next_agent = {
         "startup_advisor": "market_research",
@@ -257,11 +264,11 @@ async def run_orchestration_stream(session_id: str, user_id: str, startup_idea: 
         "startup_idea": startup_idea,
         "github_token": github_token,
         "advisor_output": None,
-        "market_research": None,
-        "product_manager": None,
-        "architect": None,
-        "engineering_manager": None,
-        "marketing": None,
+        "market_research_output": None,
+        "product_manager_output": None,
+        "architect_output": None,
+        "engineering_manager_output": None,
+        "marketing_output": None,
         "errors": [],
         "completed_agents": [],
         "current_agent": None,
@@ -314,20 +321,26 @@ async def run_orchestration_stream(session_id: str, user_id: str, startup_idea: 
                        "architect", "engineering_manager", "marketing"]:
         state_key_map = {
             "startup_advisor": "advisor_output",
-            "market_research": "market_research",
-            "product_manager": "product_manager",
-            "architect": "architect",
-            "engineering_manager": "engineering_manager",
-            "marketing": "marketing",
+            "market_research": "market_research_output",
+            "product_manager": "product_manager_output",
+            "architect": "architect_output",
+            "engineering_manager": "engineering_manager_output",
+            "marketing": "marketing_output",
         }
         data = final_state.get(state_key_map[agent_key])
         # Only emit complete status if the agent actually executed and didn't fail
         if data:
+            # Architect: expose system_design, tech_stack, data_models for display.
+            # Strip api_endpoints/scalability_notes and github_repo_url (moved to engineering_manager).
+            if agent_key == "architect" and "error" not in data:
+                display_data = {k: data[k] for k in ("system_design", "tech_stack", "data_models") if k in data}
+            else:
+                display_data = data
             yield {
                 "event": "agent_complete",
                 "agent": agent_key,
                 "label": agent_labels[agent_key],
-                "data": data,
+                "data": display_data,
             }
 
     # Store in Pinecone if Advisor succeeded
@@ -342,8 +355,8 @@ async def run_orchestration_stream(session_id: str, user_id: str, startup_idea: 
     if not has_critical_failure:
         try:
             advisor_out = final_state.get("advisor_output") or {}
-            pm_out = final_state.get("product_manager") or {}
-            arch_out = final_state.get("architect") or {}
+            pm_out = final_state.get("product_manager_output") or {}
+            arch_out = final_state.get("architect_output") or {}
 
             startup_name = advisor_out.get("startup_name") or "Untitled Startup"
             roadmaps = pm_out.get("roadmap") or []
@@ -357,7 +370,7 @@ async def run_orchestration_stream(session_id: str, user_id: str, startup_idea: 
             if github_repo_url:
                 documents.append({"name": "Source Repository (GitHub)", "url": github_repo_url, "type": "link"})
 
-            documents.append({"name": "Full Startup Pack (PDF)", "url": f"/api/sessions/{session_id}/pdf", "type": "link"})
+            documents.append({"name": "Full Startup Pack (PDF)", "url": f"/api/sessions/{session_id}/pdf", "type": "download"})
 
             uploaded = final_state.get("uploaded_files") or []
             for f in uploaded:
