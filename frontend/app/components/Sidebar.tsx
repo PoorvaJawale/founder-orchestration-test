@@ -100,7 +100,16 @@ export function Sidebar({ open, onClose }: Props) {
             textDecoration: "none",
             whiteSpace: "nowrap",
           }}>
-            <img src="/logo.png" alt="Maestro.ai" width={52} height={52} style={{ objectFit: "contain" }} />
+            <img src="/maestro-logo.jpeg" alt="Maestro.ai" width={32} height={32} style={{ borderRadius: "6px", flexShrink: 0, objectFit: "contain" }} />
+            <span style={{
+              fontFamily: "Space Mono, monospace",
+              fontWeight: 700,
+              fontSize: "11px",
+              letterSpacing: "0.14em",
+              color: "var(--accent)",
+              textTransform: "uppercase",
+              textShadow: "0 0 20px var(--accent-glow)",
+            }}>Maestro.ai</span>
           </Link>
           <button
             onClick={onClose}

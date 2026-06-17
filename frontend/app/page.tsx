@@ -200,7 +200,7 @@ export default function Home() {
         WebkitBackdropFilter: "blur(20px)",
       }}>
         <span className="site-logo" style={{ fontSize: "10px", display: "flex", alignItems: "center", gap: "6px" }}>
-          <img src="/logo.png" alt="" width={16} height={16} style={{ borderRadius: "3px" }} />
+          <img src="/maestro-logo.jpeg" alt="" width={18} height={18} style={{ borderRadius: "3px", objectFit: "contain" }} />
           Maestro.ai
         </span>
         <span className="label">AI-Powered Startup Infrastructure</span>
