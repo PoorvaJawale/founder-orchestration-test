@@ -1,0 +1,10 @@
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <!-- Left half of M -->
+  <path fill="#7c3aed" d="M10,85 L10,20 L28,20 L50,62 L28,85 Z"/>
+  <!-- Right half of M -->
+  <path fill="#7c3aed" d="M72,85 L50,62 L72,20 L90,20 L90,85 Z"/>
+  <!-- Baton line -->
+  <line x1="18" y1="90" x2="85" y2="8" stroke="#6d28d9" stroke-width="4" stroke-linecap="round"/>
+  <!-- Dot at baton tip -->
+  <circle cx="86" cy="7" r="5" fill="#c4b5fd"/>
+</svg>
