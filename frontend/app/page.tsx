@@ -43,7 +43,7 @@ export default function Home() {
     }}>
 
       {/* ── Hero + pipeline ──────────────────────── */}
-      <div style={{
+      <div className="landing-grid" style={{
         display: "grid",
         gridTemplateColumns: "1fr 420px",
         gap: "0",
@@ -51,7 +51,7 @@ export default function Home() {
       }}>
 
         {/* Left: hero text */}
-        <div style={{
+        <div className="landing-hero" style={{
           display: "flex",
           flexDirection: "column",
           justifyContent: "center",
@@ -147,7 +147,7 @@ export default function Home() {
         </div>
 
         {/* Right: agent pipeline card */}
-        <div style={{
+        <div className="landing-pipeline" style={{
           display: "flex",
           flexDirection: "column",
           justifyContent: "center",
@@ -189,7 +189,7 @@ export default function Home() {
       </div>
 
       {/* ── Footer ─────────────────────────────── */}
-      <footer style={{
+      <footer className="landing-footer" style={{
         borderTop: "1px solid var(--glass-border)",
         padding: "18px 48px",
         display: "flex",

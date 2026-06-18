@@ -35,9 +35,10 @@ function truncate(str: string, n: number) {
 type Props = {
   open: boolean;
   onClose: () => void;
+  isMobile?: boolean;
 };
 
-export function Sidebar({ open, onClose }: Props) {
+export function Sidebar({ open, onClose, isMobile }: Props) {
   const { isSignedIn, isLoaded } = useUser();
   const { getToken }             = useAuth();
   const pathname                 = usePathname();
@@ -78,8 +79,8 @@ export function Sidebar({ open, onClose }: Props) {
   // ── Render ──────────────────────────────────────────────────────────────────
   return (
     <aside
-      className="app-sidebar"
-      style={{ width: open ? 260 : 0 }}
+      className={`app-sidebar${isMobile ? (open ? " sidebar-open" : "") : ""}`}
+      style={isMobile ? undefined : { width: open ? 260 : 0 }}
       aria-label="Sidebar"
     >
       <div className="app-sidebar-inner">

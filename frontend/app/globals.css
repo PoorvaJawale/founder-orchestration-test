@@ -427,3 +427,135 @@ body {
 .glow-accent   { box-shadow: 0 0 20px var(--accent-glow); }
 .glow-cyan     { box-shadow: 0 0 20px var(--cyan-glow); }
 .glow-amber    { box-shadow: 0 0 20px var(--amber-glow); }
+
+/* ═══════════════════════════════════════════════════
+   RESPONSIVE — Mobile & Tablet
+════════════════════════════════════════════════════ */
+
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 19;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+@media (max-width: 768px) {
+  .app-sidebar {
+    position: fixed !important;
+    top: 0;
+    left: 0;
+    height: 100vh !important;
+    z-index: 20;
+    width: 260px !important;
+    transform: translateX(-100%);
+    transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    border-right: 1px solid var(--glass-border);
+  }
+
+  .app-sidebar.sidebar-open {
+    transform: translateX(0);
+  }
+
+  .sidebar-overlay {
+    display: block;
+  }
+
+  .app-main {
+    width: 100% !important;
+  }
+
+  .app-main-scroll {
+    overflow-y: auto !important;
+  }
+
+  /* Dashboard two-col */
+  .two-col {
+    grid-template-columns: 1fr !important;
+    height: auto !important;
+    overflow-y: auto;
+  }
+
+  .two-col-left,
+  .two-col-right {
+    height: auto !important;
+    overflow-y: visible !important;
+    padding: 20px 16px !important;
+  }
+
+  .two-col-left {
+    border-right: none !important;
+    border-bottom: 1px solid var(--glass-border);
+  }
+
+  /* Session page */
+  .session-layout {
+    flex-direction: column !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    height: auto !important;
+  }
+
+  .session-left {
+    width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
+    flex-shrink: 0 !important;
+  }
+
+  .session-right {
+    width: 100% !important;
+    height: auto !important;
+    min-height: 60vh;
+    overflow: visible !important;
+  }
+
+  .session-divider {
+    display: none !important;
+  }
+
+  /* Landing page */
+  .landing-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .landing-hero {
+    padding: 40px 20px !important;
+    border-right: none !important;
+    border-bottom: 1px solid var(--glass-border);
+  }
+
+  .landing-pipeline {
+    padding: 28px 20px !important;
+  }
+
+  .landing-footer {
+    padding: 16px 20px !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+    text-align: center;
+  }
+
+  /* History page */
+  .history-header {
+    padding: 16px 16px 14px !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 12px !important;
+  }
+
+  .history-list {
+    padding: 16px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .app-sidebar       { width: 240px !important; }
+  .app-sidebar-inner { width: 240px; }
+}
+
+@media (min-width: 769px) {
+  .sidebar-overlay { display: none !important; }
+}

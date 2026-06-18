@@ -179,10 +179,10 @@ export default function SessionPage() {
   };
 
   return (
-    <div ref={containerRef} style={{ display: "flex", height: "100%", overflow: "hidden" }}>
+    <div ref={containerRef} className="session-layout" style={{ display: "flex", height: "100%", overflow: "hidden" }}>
 
       {/* ══════════ LEFT: Pipeline + Log ═══════════════ */}
-      <div style={{
+      <div className="session-left" style={{
         width: `${leftPct}%`,
         flexShrink: 0,
         display: "flex",
@@ -401,6 +401,7 @@ export default function SessionPage() {
 
       {/* ══════════ DRAG DIVIDER ═══════════════════════ */}
       <div
+        className="session-divider"
         onMouseDown={handleDividerMouseDown}
         title="Drag to resize"
         style={{
@@ -440,7 +441,7 @@ export default function SessionPage() {
       </div>
 
       {/* ══════════ RIGHT: Deliverables ════════════════ */}
-      <div style={{
+      <div className="session-right" style={{
         flex: 1,
         display: "flex",
         flexDirection: "column",

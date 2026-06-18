@@ -85,7 +85,7 @@ export default function HistoryPage() {
     <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
 
       {/* ── Page header ────────────────────────── */}
-      <div style={{
+      <div className="history-header" style={{
         padding: "24px 32px 20px",
         borderBottom: "1px solid var(--glass-border)",
         flexShrink: 0,
@@ -161,7 +161,7 @@ export default function HistoryPage() {
       </div>
 
       {/* ── Session list ───────────────────────── */}
-      <div style={{ flex: 1, overflowY: "auto", padding: "20px 32px" }}>
+      <div className="history-list" style={{ flex: 1, overflowY: "auto", padding: "20px 32px" }}>
 
         {loading && (
           <div className="label animate-pulse-accent" style={{ color: "var(--accent)", padding: "20px 0" }}>
