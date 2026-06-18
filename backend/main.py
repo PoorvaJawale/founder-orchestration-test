@@ -45,7 +45,8 @@ app.add_middleware(
     allow_origins=[
         os.environ.get("FRONTEND_URL", "http://localhost:3000"),
         "https://founder-orchestration.vercel.app",
-        "*",
+        "https://maestroaipao.vercel.app",
+        "http://localhost:3000",
     ],
     allow_credentials=True,
     allow_methods=["*"],
