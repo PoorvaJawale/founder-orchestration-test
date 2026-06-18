@@ -89,14 +89,7 @@ export default function Dashboard() {
     <div className="dashboard-grid">
 
       {/* ══════════ LEFT: Idea Form ══════════════ */}
-      <div style={{
-        display: "flex",
-        flexDirection: "column",
-        height: isMobile ? "auto" : "100%",
-        overflowY: isMobile ? "visible" : "auto",
-        borderRight: isMobile ? "none" : "1px solid var(--glass-border)",
-        borderBottom: isMobile ? "1px solid var(--glass-border)" : "none",
-      }}>
+      <div className="dashboard-left">
         {/* Header */}
         <div style={{
           padding: isMobile ? "20px 16px 14px" : "28px 32px 20px",
@@ -281,13 +274,7 @@ export default function Dashboard() {
       </div>
 
       {/* ══════════ RIGHT: Agent Preview ═════════ */}
-      <div style={{
-        display: "flex",
-        flexDirection: "column",
-        height: isMobile ? "auto" : "100%",
-        overflowY: isMobile ? "visible" : "auto",
-        background: "rgba(0,0,0,0.1)",
-      }}>
+      <div className="dashboard-right">
         {/* Header */}
         <div style={{
           padding: isMobile ? "20px 16px 14px" : "28px 32px 20px",
