@@ -94,17 +94,22 @@ export function Sidebar({ open, onClose }: Props) {
           flexShrink: 0,
         }}>
           <Link href={isSignedIn ? "/dashboard" : "/"} style={{
-            fontFamily: "Space Mono, monospace",
-            fontWeight: 700,
-            fontSize: "11px",
-            letterSpacing: "0.14em",
-            color: "var(--accent)",
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
             textDecoration: "none",
-            textTransform: "uppercase",
-            textShadow: "0 0 20px var(--accent-glow)",
             whiteSpace: "nowrap",
           }}>
-            ■ Founder OS
+            <img src="/maestro-logo.jpeg" alt="Maestro.ai" width={32} height={32} style={{ borderRadius: "6px", flexShrink: 0, objectFit: "contain" }} />
+            <span style={{
+              fontFamily: "Space Mono, monospace",
+              fontWeight: 700,
+              fontSize: "11px",
+              letterSpacing: "0.14em",
+              color: "var(--accent)",
+              textTransform: "uppercase",
+              textShadow: "0 0 20px var(--accent-glow)",
+            }}>Maestro.ai</span>
           </Link>
           <button
             onClick={onClose}
@@ -150,7 +155,7 @@ export function Sidebar({ open, onClose }: Props) {
           {/* ── Nav ─────────────────────────────── */}
           {isSignedIn && (
             <nav style={{ marginBottom: "8px" }}>
-              <NavItem href="/dashboard"  label="□ New Session"  active={pathname === "/dashboard"} />
+              <NavItem href="/dashboard"  label="◆ New Session"  active={pathname === "/dashboard"} />
               <NavItem href="/history"    label="◆ History"      active={pathname === "/history"} />
             </nav>
           )}

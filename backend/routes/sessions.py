@@ -82,6 +82,16 @@ async def stream_session(
     if not session:
         raise HTTPException(status_code=404, detail="Session not found")
 
+    # Guard against duplicate SSE connections re-running the pipeline
+    if session["status"] in ("complete", "error"):
+        async def replay_complete():
+            yield f"data: {json.dumps({'type': 'complete'})}\n\n"
+        return StreamingResponse(
+            replay_complete(),
+            media_type="text/event-stream",
+            headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+        )
+
     startup_idea   = session["startup_idea"]
     uploaded_files = json.loads(session["uploaded_files"] or "[]")
     github_token   = await get_github_token_for_user(user_id)

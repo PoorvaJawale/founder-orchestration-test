@@ -4,8 +4,9 @@ import { AppShell } from "./components/AppShell";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Founder OS — AI Agent Platform",
-  description: "Turn your startup idea into a complete founder package — powered by 6 AI agents",
+  title: "Maestro.ai — AI Agent Platform",
+  description: "Turn your startup idea into a complete startup package — powered by 6 AI agents",
+  icons: { icon: "/maestro-favicon.svg" },
 };
 
 const clerkAppearance = {
@@ -13,7 +14,7 @@ const clerkAppearance = {
     colorBackground:       "#12102a",
     colorInputBackground:  "#1c1836",
     colorText:             "#f2eeff",
-    colorTextSecondary:    "rgba(242,238,255,0.55)",
+    colorTextSecondary:    "rgba(242,238,255,0.85)",
     colorPrimary:          "#a78bfa",
     colorInputText:        "#f2eeff",
     borderRadius:          "10px",
@@ -32,6 +33,16 @@ const clerkAppearance = {
     dividerText:        { color: "rgba(242,238,255,0.40)" },
     formButtonPrimary:  { background: "#7c3aed" },
     footerActionLink:   { color: "#a78bfa" },
+    userButtonPopoverActionButton: {
+      color: "#f2eeff",
+    },
+    userButtonPopoverActionButtonText: {
+      color: "#f2eeff",
+      opacity: 1,
+    },
+    userButtonPopoverActionButtonIcon: {
+      color: "#a78bfa",
+    },
   },
 };
 

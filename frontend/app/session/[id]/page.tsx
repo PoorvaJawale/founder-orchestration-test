@@ -14,6 +14,25 @@ import { useAuth } from "@clerk/nextjs";
 import Link from "next/link";
 import { getPdfUrl, getMemory, getSession, deleteSession } from "@/lib/api";
 
+// ── PDF download helper (fetch → blob → click, avoids new-tab navigation) ────
+async function triggerPdfDownload(url: string, filename: string) {
+  try {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error("Failed to fetch PDF");
+    const blob = await res.blob();
+    const blobUrl = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = blobUrl;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(blobUrl);
+  } catch (e) {
+    console.error("PDF download failed:", e);
+  }
+}
+
 // ── Agent metadata ────────────────────────────────────────────────────────────
 const AGENT_META: Record<string, { num: string; label: string; desc: string }> = {
   startup_advisor:     { num: "01", label: "Startup Advisor",     desc: "Idea validation, risk analysis" },
@@ -192,15 +211,13 @@ export default function SessionPage() {
             </div>
             <div style={{ marginLeft: "auto", display: "flex", gap: "6px", alignItems: "center" }}>
               {done && (
-                <a
-                  href={getPdfUrl(id)}
-                  target="_blank"
-                  rel="noreferrer"
+                <button
+                  onClick={() => triggerPdfDownload(getPdfUrl(id), `founder-report-${id.slice(0,8)}.pdf`)}
                   className="btn-primary"
-                  style={{ padding: "5px 14px", fontSize: "11px", textDecoration: "none" }}
+                  style={{ padding: "5px 14px", fontSize: "11px" }}
                 >
                   ↓ PDF
-                </a>
+                </button>
               )}
               {/* Delete session */}
               {!confirmDelete ? (
@@ -310,7 +327,7 @@ export default function SessionPage() {
               padding: "12px 14px",
               maxHeight: "180px",
               overflowY: "auto",
-              color: "#6ee7b7",
+              color: "var(--log-color)",
               background: "rgba(0,0,0,0.3)",
             }}>
               {logs.length === 0
@@ -350,36 +367,6 @@ export default function SessionPage() {
                     ))}
                   </div>
                 )}
-                {/* Linked Documents — backend returns field as "documents" */}
-                {(memory.documents?.length > 0 || memory.linked_documents?.length > 0) && (
-                  <div>
-                    <div className="label" style={{ marginBottom: "6px" }}>Linked Documents</div>
-                    {(memory.documents || memory.linked_documents).map((doc: any, idx: number) => (
-                      <div key={idx} className="glass-inner" style={{ padding: "8px 12px", marginBottom: "4px", display: "flex", alignItems: "center", gap: "8px" }}>
-                        <span style={{ color: "var(--accent)", fontSize: "11px", flexShrink: 0 }}>◆</span>
-                        {(doc.url || doc.link) ? (
-                          <a
-                            href={doc.url || doc.link}
-                            target="_blank"
-                            rel="noreferrer"
-                            style={{ fontSize: "11px", color: "var(--accent)", textDecoration: "none", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
-                            onMouseEnter={e => (e.currentTarget.style.textDecoration = "underline")}
-                            onMouseLeave={e => (e.currentTarget.style.textDecoration = "none")}
-                          >
-                            {doc.title || doc.name || doc.url || doc.link}
-                          </a>
-                        ) : (
-                          <span style={{ fontSize: "11px", color: "var(--text)" }}>{doc.title || doc.name || String(doc)}</span>
-                        )}
-                        {doc.type && (
-                          <span className="mono" style={{ fontSize: "9px", color: "var(--muted)", background: "rgba(255,255,255,0.05)", padding: "2px 6px", borderRadius: "4px", flexShrink: 0, marginLeft: "auto" }}>
-                            {doc.type}
-                          </span>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
               </div>
             </div>
           )}
@@ -395,10 +382,13 @@ export default function SessionPage() {
               </p>
               <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap" }}>
                 {!error && (
-                  <a href={getPdfUrl(id)} target="_blank" rel="noreferrer" className="btn-primary"
-                     style={{ padding: "10px 20px", fontSize: "12px", textDecoration: "none" }}>
+                  <button
+                    onClick={() => triggerPdfDownload(getPdfUrl(id), `founder-report-${id.slice(0,8)}.pdf`)}
+                    className="btn-primary"
+                    style={{ padding: "10px 20px", fontSize: "12px" }}
+                  >
                     ↓ Download PDF
-                  </a>
+                  </button>
                 )}
                 <Link href="/dashboard" className="btn-ghost" style={{ padding: "10px 20px", fontSize: "12px" }}>
                   New Idea
@@ -520,63 +510,19 @@ export default function SessionPage() {
           )}
 
           {activeTab === "tech" && (
-            agents.architect.data ? (
-              <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
-                {agents.architect.data.data_models && (
-                  <div>
-                    <div className="label" style={{ marginBottom: "12px" }}>Database Models</div>
-                    <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-                      {agents.architect.data.data_models.map((model: any, mIdx: number) => (
-                        <div key={mIdx} className="glass-inner" style={{ padding: "12px 14px", fontFamily: "Space Mono, monospace", fontSize: "11px" }}>
-                          <div style={{ color: "var(--accent)", fontWeight: 700, marginBottom: "6px" }}>class {model.name}</div>
-                          {model.fields?.map((field: string, fIdx: number) => (
-                            <div key={fIdx} style={{ color: "var(--muted)", paddingLeft: "14px" }}>— {field}</div>
-                          ))}
-                        </div>
+            agents.architect.data?.data_models ? (
+              <div>
+                <div className="label" style={{ marginBottom: "12px" }}>Database Models</div>
+                <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                  {agents.architect.data.data_models.map((model: any, mIdx: number) => (
+                    <div key={mIdx} className="glass-inner" style={{ padding: "12px 14px", fontFamily: "Space Mono, monospace", fontSize: "11px" }}>
+                      <div style={{ color: "var(--accent)", fontWeight: 700, marginBottom: "6px" }}>class {model.name}</div>
+                      {model.fields?.map((field: string, fIdx: number) => (
+                        <div key={fIdx} style={{ color: "var(--muted)", paddingLeft: "14px" }}>— {field}</div>
                       ))}
                     </div>
-                  </div>
-                )}
-                {agents.architect.data.api_endpoints && (
-                  <div>
-                    <div className="label" style={{ marginBottom: "12px" }}>API Endpoints</div>
-                    <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-                      {agents.architect.data.api_endpoints.map((ep: any, epIdx: number) => {
-                        const mc = ep.method === "GET" ? "var(--success)" : ep.method === "POST" ? "var(--accent)" : "var(--warning)";
-                        return (
-                          <div key={epIdx} className="glass-inner" style={{ padding: "10px 14px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px", fontFamily: "Space Mono, monospace", fontSize: "11px" }}>
-                            <div style={{ display: "flex", gap: "10px" }}>
-                              <span style={{ color: mc, fontWeight: 700, minWidth: "36px" }}>{ep.method}</span>
-                              <span style={{ color: "var(--text)" }}>{ep.path}</span>
-                            </div>
-                            <span style={{ color: "var(--muted)", fontSize: "10px", textAlign: "right", flexShrink: 0 }}>{ep.description}</span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
-                {agents.architect.data.system_design && (
-                  <OField label="System Design" value={agents.architect.data.system_design} />
-                )}
-                {agents.architect.data.tech_stack && (
-                  <div>
-                    <div className="label" style={{ marginBottom: "6px" }}>Tech Stack</div>
-                    <div className="glass-inner" style={{ padding: "12px 14px" }}>
-                      {Object.entries(agents.architect.data.tech_stack).map(([k, v]: any) => (
-                        <div key={k} style={{ fontSize: "12px", display: "flex", gap: "8px", marginBottom: "4px" }}>
-                          <span style={{ color: "var(--muted)", minWidth: "90px", textTransform: "capitalize" }}>{k}</span>
-                          <span style={{ color: "var(--text)" }}>{String(v)}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                {agents.architect.data.github_repo_url && (
-                  <a href={agents.architect.data.github_repo_url} target="_blank" rel="noreferrer" className="btn-ghost" style={{ alignSelf: "flex-start" }}>
-                    View GitHub Repo →
-                  </a>
-                )}
+                  ))}
+                </div>
               </div>
             ) : <Waiting label="Architect" />
           )}
@@ -633,109 +579,8 @@ export default function SessionPage() {
               const repoUrl  = em.github_repo_url || arch?.github_repo_url;
               const repoName = arch?.github_repo_name || (repoUrl ? repoUrl.split("/").pop() : null);
 
-              // Prefer real GitHub issues (have URLs) over sprint task list
-              const ghIssues: { num: number; title: string; url?: string; label?: string; sprint?: number; points?: number }[] =
-                em.github_issues?.length > 0
-                  ? em.github_issues.map((gi: any, i: number) => ({ num: gi.number ?? i + 1, title: gi.title, url: gi.url }))
-                  : (() => {
-                      let counter = 0;
-                      const list: any[] = [];
-                      (em.sprints || []).forEach((sprint: any) => {
-                        (sprint.tasks || []).forEach((task: any) => {
-                          counter++;
-                          list.push({ num: counter, title: task.title, label: task.label, sprint: sprint.sprint, points: task.story_points });
-                        });
-                      });
-                      return list;
-                    })();
-              const allIssues = ghIssues;
-
-              const LABEL_COLOR: Record<string, string> = {
-                frontend: "var(--cyan)", backend: "var(--accent)", infra: "var(--amber)",
-                design: "var(--success)", task: "var(--muted)",
-              };
-
               return (
                 <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-
-                  {/* GitHub Repo Banner */}
-                  {repoUrl ? (
-                    <a href={repoUrl} target="_blank" rel="noreferrer" style={{ textDecoration: "none" }}>
-                      <div className="glass-accent" style={{ padding: "16px 18px", borderRadius: "12px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                        <div>
-                          <div className="label-accent" style={{ marginBottom: "4px" }}>⬡ GitHub Repository Created</div>
-                          <div style={{ fontWeight: 700, fontSize: "14px", color: "var(--text)", fontFamily: "Space Mono, monospace" }}>
-                            {repoName || "View Repo"}
-                          </div>
-                          <div style={{ fontSize: "10px", color: "var(--muted)", marginTop: "2px" }}>{repoUrl}</div>
-                        </div>
-                        <span style={{ fontSize: "18px", color: "var(--accent)", flexShrink: 0 }}>↗</span>
-                      </div>
-                    </a>
-                  ) : (
-                    <div className="glass-inner" style={{ padding: "14px 16px", fontSize: "12px", color: "var(--muted)" }}>
-                      GitHub repo not created — connect GitHub in settings to enable.
-                    </div>
-                  )}
-
-                  {/* Stats row */}
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "8px" }}>
-                    {[
-                      { val: `${em.total_weeks}w`, label: "Duration" },
-                      { val: em.sprints?.length ?? "—", label: "Sprints" },
-                      { val: em.github_issues_created ?? allIssues.length, label: "Issues Created" },
-                    ].map(stat => (
-                      <div key={stat.label} className="glass-inner" style={{ padding: "12px", textAlign: "center" }}>
-                        <div style={{ fontWeight: 700, fontSize: "20px", color: "var(--accent)" }}>{stat.val}</div>
-                        <div className="label" style={{ marginTop: "2px" }}>{stat.label}</div>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* GitHub Issues as commit log */}
-                  {allIssues.length > 0 && (
-                    <div>
-                      <div className="label" style={{ marginBottom: "10px" }}>GitHub Issues (Commit Log)</div>
-                      <div style={{ borderRadius: "10px", overflow: "hidden", border: "1px solid var(--glass-border)" }}>
-                        {allIssues.map((issue, i) => (
-                          <div key={i} style={{
-                            display: "flex", alignItems: "center", gap: "12px",
-                            padding: "10px 14px",
-                            borderBottom: i < allIssues.length - 1 ? "1px solid var(--glass-border)" : "none",
-                            background: i % 2 === 0 ? "rgba(255,255,255,0.02)" : "transparent",
-                          }}>
-                            {/* Issue number */}
-                            <span className="mono" style={{
-                              fontSize: "10px", color: "var(--accent)", fontWeight: 700,
-                              background: "var(--accent-dim)", padding: "2px 7px", borderRadius: "4px", flexShrink: 0,
-                            }}>#{issue.num}</span>
-                            {/* Title — clickable if GitHub URL exists */}
-                            {issue.url ? (
-                              <a href={issue.url} target="_blank" rel="noreferrer" style={{ fontSize: "12px", color: "var(--text)", flex: 1, textDecoration: "none" }}
-                                onMouseOver={e => (e.currentTarget.style.color = "var(--accent)")}
-                                onMouseOut={e => (e.currentTarget.style.color = "var(--text)")}
-                              >{issue.title} ↗</a>
-                            ) : (
-                              <span style={{ fontSize: "12px", color: "var(--text)", flex: 1 }}>{issue.title}</span>
-                            )}
-                            {/* Label badge */}
-                            {issue.label && (
-                              <span className="mono" style={{
-                                fontSize: "9px", padding: "2px 7px", borderRadius: "4px", flexShrink: 0,
-                                color: LABEL_COLOR[issue.label] || "var(--muted)",
-                                background: "rgba(255,255,255,0.05)",
-                                border: `1px solid ${LABEL_COLOR[issue.label] || "var(--glass-border)"}30`,
-                              }}>{issue.label}</span>
-                            )}
-                            {/* Story points */}
-                            {issue.points && (
-                              <span className="mono" style={{ fontSize: "9px", color: "var(--faint)", flexShrink: 0 }}>{issue.points}pt</span>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
 
                   {/* Sprint cards */}
                   {em.sprints?.map((sprint: any, sIdx: number) => (
@@ -919,36 +764,41 @@ function AgentOutput({ agentKey, data }: { agentKey: string; data: any }) {
     </div>
   );
 
-  if (agentKey === "architect") return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-      <OField label="System Design" value={data.system_design} />
-      {/* Tech Stack */}
-      {data.tech_stack && Object.keys(data.tech_stack).length > 0 && (
-        <div>
-          <div className="label" style={{ marginBottom: "5px" }}>Tech Stack</div>
-          <div className="glass-inner" style={{ padding: "10px 12px" }}>
-            {Object.entries(data.tech_stack).map(([k, v]: any) => (
-              <div key={k} style={{ fontSize: "11px", display: "flex", gap: "8px", marginBottom: "4px" }}>
-                <span style={{ color: "var(--muted)", minWidth: "80px", textTransform: "capitalize", flexShrink: 0 }}>{k}</span>
-                <span style={{ color: "var(--text)", fontWeight: 500 }}>{String(v)}</span>
+  if (agentKey === "architect") {
+    const hasContent = data.system_design || (data.tech_stack && Object.keys(data.tech_stack).length > 0);
+    return (
+      <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+        {hasContent ? (
+          <>
+            <OField label="System Design" value={data.system_design} />
+            {data.tech_stack && Object.keys(data.tech_stack).length > 0 && (
+              <div>
+                <div className="label" style={{ marginBottom: "5px" }}>Tech Stack</div>
+                <div className="glass-inner" style={{ padding: "10px 12px" }}>
+                  {Object.entries(data.tech_stack).map(([k, v]: any) => (
+                    <div key={k} style={{ fontSize: "11px", display: "flex", gap: "8px", marginBottom: "4px" }}>
+                      <span style={{ color: "var(--muted)", minWidth: "80px", textTransform: "capitalize", flexShrink: 0 }}>{k}</span>
+                      <span style={{ color: "var(--text)", fontWeight: 500 }}>{String(v)}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
-            ))}
-          </div>
-        </div>
-      )}
-      {data.github_repo_url && (
-        <a href={data.github_repo_url} target="_blank" rel="noreferrer" className="btn-ghost" style={{ alignSelf: "flex-start" }}>
-          View GitHub Repo →
-        </a>
-      )}
-    </div>
-  );
+            )}
+          </>
+        ) : (
+          <p style={{ fontSize: "12px", color: "var(--muted)", fontStyle: "italic" }}>
+            This session was generated before the latest update. Run a new session to see System Design and Tech Stack here.
+          </p>
+        )}
+      </div>
+    );
+  }
 
   if (agentKey === "engineering_manager") return (
     <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-      {/* Stats row */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "8px" }}>
-        {[{ val: `${data.total_weeks}w`, label: "Duration" }, { val: data.sprints?.length, label: "Sprints" }, { val: data.github_issues_created ?? "—", label: "Issues" }].map(stat => (
+      {/* Stats row — Duration + Sprints only */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
+        {[{ val: `${data.total_weeks}w`, label: "Duration" }, { val: data.sprints?.length, label: "Sprints" }].map(stat => (
           <div key={stat.label} className="glass-inner" style={{ padding: "12px", textAlign: "center" }}>
             <div style={{ fontWeight: 700, fontSize: "20px", color: "var(--accent)" }}>{stat.val}</div>
             <div className="label" style={{ marginTop: "2px" }}>{stat.label}</div>
@@ -961,20 +811,6 @@ function AgentOutput({ agentKey, data }: { agentKey: string; data: any }) {
           GitHub Repo Created →
         </a>
       )}
-      {/* GitHub Issues list */}
-      {data.github_issues && Array.isArray(data.github_issues) && data.github_issues.length > 0 && (
-        <div>
-          <div className="label" style={{ marginBottom: "5px" }}>GitHub Issues</div>
-          {data.github_issues.map((issue: any, i: number) => (
-            <div key={i} style={{ display: "flex", gap: "8px", marginBottom: "3px", alignItems: "flex-start" }}>
-              <span className="mono" style={{ fontSize: "9px", color: "var(--accent)", background: "var(--accent-dim)", padding: "2px 6px", borderRadius: "4px", flexShrink: 0, marginTop: "1px" }}>
-                #{i + 1}
-              </span>
-              <span style={{ fontSize: "11px", color: "var(--muted)" }}>{typeof issue === "string" ? issue : issue.title}</span>
-            </div>
-          ))}
-        </div>
-      )}
       {/* Sprints summary */}
       {data.sprints?.length > 0 && (
         <div>
@@ -985,12 +821,7 @@ function AgentOutput({ agentKey, data }: { agentKey: string; data: any }) {
                 <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--accent)" }}>Sprint {sprint.sprint}: {sprint.goal}</span>
                 <span className="mono" style={{ fontSize: "9px", color: "var(--muted)", background: "rgba(255,255,255,0.05)", padding: "2px 6px", borderRadius: "4px" }}>{sprint.duration_weeks}w</span>
               </div>
-              {sprint.tasks?.slice(0, 3).map((t: any, tIdx: number) => (
-                <div key={tIdx} style={{ fontSize: "10px", color: "var(--muted)", paddingLeft: "8px", marginBottom: "1px" }}>— {t.title}</div>
-              ))}
-              {sprint.tasks?.length > 3 && (
-                <div style={{ fontSize: "10px", color: "var(--faint)", paddingLeft: "8px" }}>+{sprint.tasks.length - 3} more tasks</div>
-              )}
+              {sprint.tasks?.length > 0 && <SprintTaskList tasks={sprint.tasks} />}
             </div>
           ))}
         </div>
@@ -1072,6 +903,31 @@ function AgentOutput({ agentKey, data }: { agentKey: string; data: any }) {
 }
 
 // ── Helper components ─────────────────────────────────────────────────────────
+
+function SprintTaskList({ tasks }: { tasks: any[] }) {
+  const [expanded, setExpanded] = useState(false);
+  const visible = expanded ? tasks : tasks.slice(0, 3);
+  const hidden  = tasks.length - 3;
+  return (
+    <>
+      {visible.map((t: any, tIdx: number) => (
+        <div key={tIdx} style={{ fontSize: "10px", color: "var(--muted)", paddingLeft: "8px", marginBottom: "1px" }}>— {t.title}</div>
+      ))}
+      {hidden > 0 && (
+        <button
+          onClick={e => { e.stopPropagation(); setExpanded(v => !v); }}
+          style={{
+            fontSize: "10px", color: "var(--accent)", paddingLeft: "8px", marginTop: "2px",
+            background: "none", border: "none", cursor: "pointer", padding: "0 0 0 8px",
+            textDecoration: "underline", textAlign: "left",
+          }}
+        >
+          {expanded ? "▲ show less" : `+${hidden} more tasks`}
+        </button>
+      )}
+    </>
+  );
+}
 
 function Waiting({ label }: { label: string }) {
   return (

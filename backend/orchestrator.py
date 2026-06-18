@@ -177,6 +177,10 @@ def node_marketing(state: FounderState, config=None) -> dict:
             "current_agent": "complete"}
 
 
+# Agents that must succeed for the pipeline to continue; others are non-fatal
+_FATAL_AGENTS = {"startup_advisor"}
+
+
 def route_next(state: FounderState) -> str:
     current = state.get("current_agent")
     output_keys = {
@@ -187,13 +191,16 @@ def route_next(state: FounderState) -> str:
         "engineering_manager": "engineering_manager_output",
         "marketing": "marketing_output",
     }
-    
+
     out_key = output_keys.get(current)
     if out_key:
         out_val = state.get(out_key)
         if isinstance(out_val, dict) and "error" in out_val:
-            # Halt immediately on error
-            return END
+            if current in _FATAL_AGENTS:
+                return END
+            # Non-fatal: replace error dict with empty dict so downstream agents
+            # don't crash on missing keys, then continue the pipeline
+            state[out_key] = {}
             
     next_agent = {
         "startup_advisor": "market_research",
@@ -323,11 +330,17 @@ async def run_orchestration_stream(session_id: str, user_id: str, startup_idea: 
         data = final_state.get(state_key_map[agent_key])
         # Only emit complete status if the agent actually executed and didn't fail
         if data:
+            # Architect: expose system_design, tech_stack, data_models for display.
+            # Strip api_endpoints/scalability_notes and github_repo_url (moved to engineering_manager).
+            if agent_key == "architect" and "error" not in data:
+                display_data = {k: data[k] for k in ("system_design", "tech_stack", "data_models") if k in data}
+            else:
+                display_data = data
             yield {
                 "event": "agent_complete",
                 "agent": agent_key,
                 "label": agent_labels[agent_key],
-                "data": data,
+                "data": display_data,
             }
 
     # Store in Pinecone if Advisor succeeded
@@ -357,7 +370,7 @@ async def run_orchestration_stream(session_id: str, user_id: str, startup_idea: 
             if github_repo_url:
                 documents.append({"name": "Source Repository (GitHub)", "url": github_repo_url, "type": "link"})
 
-            documents.append({"name": "Full Startup Pack (PDF)", "url": f"/api/sessions/{session_id}/pdf", "type": "link"})
+            documents.append({"name": "Full Startup Pack (PDF)", "url": f"/api/sessions/{session_id}/pdf", "type": "download"})
 
             uploaded = final_state.get("uploaded_files") or []
             for f in uploaded:

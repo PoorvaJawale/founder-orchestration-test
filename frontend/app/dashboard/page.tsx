@@ -97,7 +97,7 @@ export default function Dashboard() {
           backdropFilter: "blur(20px)",
           WebkitBackdropFilter: "blur(20px)",
         }}>
-          <div className="label-accent" style={{ marginBottom: "4px" }}>□ New Session</div>
+          <div className="label-accent" style={{ marginBottom: "4px" }}>◆ New Session</div>
           <h1 style={{
             fontFamily: "'Space Grotesk', sans-serif",
             fontWeight: 700,
