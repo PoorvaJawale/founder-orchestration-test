@@ -428,6 +428,15 @@ body {
 .glow-cyan     { box-shadow: 0 0 20px var(--cyan-glow); }
 .glow-amber    { box-shadow: 0 0 20px var(--amber-glow); }
 
+/* ─── Dashboard grid ─────────────────────────────── */
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  height: 100%;
+  overflow-y: hidden;
+}
+
 /* ═══════════════════════════════════════════════════
    RESPONSIVE — Mobile & Tablet
 ════════════════════════════════════════════════════ */
@@ -480,6 +489,24 @@ body {
 
   .app-main-scroll {
     overflow-y: auto !important;
+  }
+
+  /* Dashboard grid — stack form above pipeline on mobile */
+  .dashboard-grid {
+    grid-template-columns: 1fr !important;
+    height: auto !important;
+    overflow-y: visible !important;
+  }
+
+  .dashboard-grid > div {
+    height: auto !important;
+    overflow-y: visible !important;
+    border-right: none !important;
+    border-bottom: 1px solid var(--glass-border);
+  }
+
+  .dashboard-grid > div:last-child {
+    border-bottom: none !important;
   }
 
   /* Dashboard two-col */

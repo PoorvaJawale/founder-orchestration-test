@@ -86,12 +86,7 @@ export default function Dashboard() {
   };
 
   return (
-    <div style={{
-      display: "grid",
-      gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
-      height: isMobile ? "auto" : "100%",
-      overflowY: isMobile ? "auto" : "hidden",
-    }}>
+    <div className="dashboard-grid">
 
       {/* ══════════ LEFT: Idea Form ══════════════ */}
       <div style={{
