@@ -182,7 +182,7 @@ export default function Dashboard() {
           {/* Supporting docs */}
           <div className="glass" style={{ padding: "16px 18px" }}>
             <div className="label" style={{ marginBottom: "12px" }}>□ Supporting Documents (PDF · optional)</div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "8px" }}>
+            <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr 1fr", gap: "8px" }}>
               {[
                 { label: "Business Plan",     file: businessPlan,      ref: bpRef,  set: setBusinessPlan },
                 { label: "Competitor Report", file: competitorReport,  ref: crRef,  set: setCompetitorReport },
@@ -318,7 +318,7 @@ export default function Dashboard() {
         </div>
 
         {/* Agent cards */}
-        <div style={{ flex: 1, padding: "20px 28px 32px", display: "flex", flexDirection: "column", gap: "10px" }}>
+        <div style={{ flex: 1, padding: isMobile ? "16px 16px 24px" : "20px 28px 32px", display: "flex", flexDirection: "column", gap: "10px" }}>
           {AGENTS.map((a, i) => (
             <div
               key={a.num}

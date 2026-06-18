@@ -443,6 +443,17 @@ body {
 }
 
 @media (max-width: 768px) {
+  html, body {
+    overflow: auto !important;
+    height: auto !important;
+  }
+
+  .app-shell {
+    height: auto !important;
+    min-height: 100vh;
+    overflow: visible !important;
+  }
+
   .app-sidebar {
     position: fixed !important;
     top: 0;
