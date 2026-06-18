@@ -73,9 +73,17 @@ export default function SessionPage() {
   const [memory,        setMemory]        = useState<any>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleting,      setDeleting]      = useState(false);
+  const [isMobile,      setIsMobile]      = useState(false);
 
   const completedRef  = useRef<Set<string>>(new Set());
   const logsEndRef    = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth <= 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
 
   // ── Resizable split ──────────────────────────────────────────────────────────
   const [leftPct, setLeftPct]   = useState(50);          // % width of left column
@@ -179,16 +187,17 @@ export default function SessionPage() {
   };
 
   return (
-    <div ref={containerRef} className="session-layout" style={{ display: "flex", height: "100%", overflow: "hidden" }}>
+    <div ref={containerRef} className="session-layout" style={{ display: "flex", flexDirection: isMobile ? "column" : "row", height: isMobile ? "auto" : "100%", overflow: isMobile ? "visible" : "hidden" }}>
 
       {/* ══════════ LEFT: Pipeline + Log ═══════════════ */}
       <div className="session-left" style={{
-        width: `${leftPct}%`,
+        width: isMobile ? "100%" : `${leftPct}%`,
         flexShrink: 0,
         display: "flex",
         flexDirection: "column",
-        height: "100%",
-        overflow: "hidden",
+        height: isMobile ? "auto" : "100%",
+        overflow: isMobile ? "visible" : "hidden",
+        borderBottom: isMobile ? "1px solid var(--glass-border)" : "none",
       }}>
         {/* Header */}
         <div style={{
@@ -400,7 +409,7 @@ export default function SessionPage() {
       </div>
 
       {/* ══════════ DRAG DIVIDER ═══════════════════════ */}
-      <div
+      {!isMobile && <div
         className="session-divider"
         onMouseDown={handleDividerMouseDown}
         title="Drag to resize"
@@ -438,15 +447,15 @@ export default function SessionPage() {
             <div key={i} style={{ width: 3, height: 3, borderRadius: "50%", background: "var(--muted)", opacity: 0.5 }} />
           ))}
         </div>
-      </div>
+      </div>}
 
       {/* ══════════ RIGHT: Deliverables ════════════════ */}
       <div className="session-right" style={{
         flex: 1,
         display: "flex",
         flexDirection: "column",
-        height: "100%",
-        overflow: "hidden",
+        height: isMobile ? "auto" : "100%",
+        overflow: isMobile ? "visible" : "hidden",
         background: "rgba(0,0,0,0.08)",
       }}>
         {/* Deliverables tab strip */}

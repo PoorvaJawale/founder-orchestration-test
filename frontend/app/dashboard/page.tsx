@@ -10,7 +10,7 @@
  * Nav and integrations status now live in the Sidebar (AppShell).
  */
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@clerk/nextjs";
 import { createSession, verifyIntegrations } from "@/lib/api";
@@ -41,6 +41,7 @@ export default function Dashboard() {
   const [error,           setError]           = useState("");
   const [integrations,    setIntegrations]    = useState<{ github: { valid: boolean; username?: string }; notion: { valid: boolean } } | null>(null);
   const [checkingInt,     setCheckingInt]     = useState(true);
+  const [isMobile,        setIsMobile]        = useState(false);
 
   const bpRef  = useRef<HTMLInputElement>(null);
   const crRef  = useRef<HTMLInputElement>(null);
@@ -48,6 +49,13 @@ export default function Dashboard() {
 
   const router    = useRouter();
   const { getToken } = useAuth();
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth <= 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
 
   useEffect(() => {
     getToken()
@@ -78,19 +86,25 @@ export default function Dashboard() {
   };
 
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", height: "100%" }}>
+    <div style={{
+      display: "grid",
+      gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
+      height: isMobile ? "auto" : "100%",
+      overflowY: isMobile ? "auto" : "hidden",
+    }}>
 
       {/* ══════════ LEFT: Idea Form ══════════════ */}
       <div style={{
         display: "flex",
         flexDirection: "column",
-        height: "100%",
-        overflowY: "auto",
-        borderRight: "1px solid var(--glass-border)",
+        height: isMobile ? "auto" : "100%",
+        overflowY: isMobile ? "visible" : "auto",
+        borderRight: isMobile ? "none" : "1px solid var(--glass-border)",
+        borderBottom: isMobile ? "1px solid var(--glass-border)" : "none",
       }}>
         {/* Header */}
         <div style={{
-          padding: "28px 32px 20px",
+          padding: isMobile ? "20px 16px 14px" : "28px 32px 20px",
           borderBottom: "1px solid var(--glass-border)",
           flexShrink: 0,
           background: "var(--nav-bg)",
@@ -113,7 +127,7 @@ export default function Dashboard() {
         </div>
 
         {/* Scrollable form body */}
-        <div style={{ flex: 1, padding: "24px 32px 32px", display: "flex", flexDirection: "column", gap: "20px" }}>
+        <div style={{ flex: 1, padding: isMobile ? "16px 16px 24px" : "24px 32px 32px", display: "flex", flexDirection: "column", gap: "20px" }}>
 
           {/* Integrations status strip */}
           {!checkingInt && integrations && (
@@ -275,13 +289,13 @@ export default function Dashboard() {
       <div style={{
         display: "flex",
         flexDirection: "column",
-        height: "100%",
-        overflowY: "auto",
+        height: isMobile ? "auto" : "100%",
+        overflowY: isMobile ? "visible" : "auto",
         background: "rgba(0,0,0,0.1)",
       }}>
         {/* Header */}
         <div style={{
-          padding: "28px 32px 20px",
+          padding: isMobile ? "20px 16px 14px" : "28px 32px 20px",
           borderBottom: "1px solid var(--glass-border)",
           flexShrink: 0,
           background: "var(--nav-bg)",

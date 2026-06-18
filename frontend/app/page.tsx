@@ -9,7 +9,7 @@
 
 import { SignInButton, SignUpButton, useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 const AGENTS = [
   { num: "01", label: "Startup Advisor",    desc: "Idea validation, risks, market fit" },
@@ -25,10 +25,18 @@ const OUTPUTS = ["GitHub Repo", "Notion PRD", "Sprint Board", "PDF Report", "GTM
 export default function Home() {
   const { isSignedIn, isLoaded } = useUser();
   const router = useRouter();
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
     if (isSignedIn) router.replace("/dashboard");
   }, [isSignedIn, router]);
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth <= 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
 
   // Show nothing while checking auth (avoids flash of landing for signed-in users)
   if (!isLoaded || isSignedIn) return null;
@@ -45,9 +53,9 @@ export default function Home() {
       {/* ── Hero + pipeline ──────────────────────── */}
       <div className="landing-grid" style={{
         display: "grid",
-        gridTemplateColumns: "1fr 420px",
+        gridTemplateColumns: isMobile ? "1fr" : "1fr 420px",
         gap: "0",
-        minHeight: "calc(100vh - 56px)",
+        minHeight: isMobile ? "auto" : "calc(100vh - 56px)",
       }}>
 
         {/* Left: hero text */}
@@ -55,8 +63,9 @@ export default function Home() {
           display: "flex",
           flexDirection: "column",
           justifyContent: "center",
-          padding: "60px 48px 60px 48px",
-          borderRight: "1px solid var(--glass-border)",
+          padding: isMobile ? "40px 20px 32px" : "60px 48px 60px 48px",
+          borderRight: isMobile ? "none" : "1px solid var(--glass-border)",
+          borderBottom: isMobile ? "1px solid var(--glass-border)" : "none",
         }}>
           {/* Badge */}
           <div style={{
@@ -151,7 +160,7 @@ export default function Home() {
           display: "flex",
           flexDirection: "column",
           justifyContent: "center",
-          padding: "40px 24px",
+          padding: isMobile ? "24px 20px 32px" : "40px 24px",
           background: "rgba(0,0,0,0.12)",
         }}>
           <div className="label-accent" style={{ marginBottom: "4px", paddingLeft: "4px" }}>Agent Pipeline</div>
